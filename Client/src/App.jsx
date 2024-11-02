@@ -51,12 +51,15 @@ const App = () => {
   const { socket } = useSelector((store) => store.socketio);
   useEffect(() => {
     if (user) {
-      const socketio = io("http://localhost:3000", {
-        query: {
-          userId: user._id,
-        },
-        transports: ["websocket"],
-      });
+      const socketio = io(
+        "https://instagram-fullstack-clone-backend.vercel.app",
+        {
+          query: {
+            userId: user._id,
+          },
+          transports: ["websocket"],
+        }
+      );
       dispatch(setSocket(socketio));
 
       // listening all the socket events
