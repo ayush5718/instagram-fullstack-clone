@@ -18,12 +18,14 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+
 const corsOptions = {
-  origin: ["https://instagram-fullstack-clone-alpha.vercel.app"],
+  origin: process.env.FRONTEND_URL,
   credentials: true,
-  methods: ["GET", "POST", "DELETE", "PUT"],
 };
+
 app.use(cors(corsOptions));
+
 app.get("/", (req, res) => {
   res.json("Server is up and running");
 });
