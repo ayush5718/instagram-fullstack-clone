@@ -21,6 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 const corsOptions = {
   origin: "https://instagram-fullstack-clone-alpha.vercel.app",
   credentials: true,
+  methods: ["GET", "POST", "DELETE", "PUT"],
 };
 app.use(cors(corsOptions));
 app.get("/", (req, res) => {
