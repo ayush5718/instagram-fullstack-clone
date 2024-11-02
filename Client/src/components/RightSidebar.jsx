@@ -12,7 +12,11 @@ const RightSidebar = () => {
       <div className="flex items-center gap-2">
         <Link to={`/profile/${user?._id}`}>
           <Avatar>
-            <AvatarImage src={user?.profilePicture} alt="post_image" />
+            <AvatarImage
+              src={user?.profilePicture}
+              alt="post_image"
+              className="object-cover"
+            />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
         </Link>

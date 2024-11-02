@@ -31,6 +31,7 @@ const Profile = () => {
               <AvatarImage
                 src={userProfile?.profilePicture}
                 alt="profilephoto"
+                className="object-cover"
               />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
@@ -105,7 +106,7 @@ const Profile = () => {
                   <AtSign />{" "}
                   <span className="pl-1">{userProfile?.username}</span>{" "}
                 </Badge>
-                <span>🤯Learn code with patel mernstack style</span>
+                <span>💻Turning idea's into 0's and 1's</span>
                 <span>🤯Turing code into fun</span>
                 <span>🤯DM for collaboration</span>
               </div>

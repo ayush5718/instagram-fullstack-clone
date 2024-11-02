@@ -82,6 +82,21 @@ const Post = ({ post }) => {
     }
   };
 
+  // bookmark handler
+  const bookmarkHandler = async () => {
+    try {
+      const res = await axios.get(`/post/${post._id}/bookmark`, {
+        withCredentials: true,
+      });
+      if (res?.data?.success) {
+        toast.success(res?.data?.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message);
+    }
+  };
+
   const commentHandler = async () => {
     try {
       const res = await axios.post(
@@ -138,7 +153,11 @@ const Post = ({ post }) => {
               Unfollow
             </Button>
 
-            <Button variant="ghost" className="cursor-pointer w-fit ">
+            <Button
+              variant="ghost"
+              className="cursor-pointer w-fit "
+              onClick={bookmarkHandler}
+            >
               Add to favourite
             </Button>
 
@@ -186,7 +205,10 @@ const Post = ({ post }) => {
           <Send className="cursor-pointer hover:text-gray-600" />
         </div>
         <div>
-          <Bookmark className="cursor-pointer hover:text-gray-600" />
+          <Bookmark
+            onClick={bookmarkHandler}
+            className="cursor-pointer hover:text-gray-600"
+          />
         </div>
       </div>
       <span className="font-medium block mb-2">{postLikeCount} likes</span>

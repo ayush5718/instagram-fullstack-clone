@@ -9,10 +9,9 @@ import connectDB from "./config/db.js";
 import authRouter from "./routes/user.routes.js";
 import postRouter from "./routes/post.routes.js";
 import messageRouter from "./routes/message.routes.js";
-
+import { app, server } from "./socket/socket.js";
 dotenv.config();
 
-const app = express();
 const PORT = process.env.PORT || 5000;
 
 //middlewares
@@ -20,17 +19,19 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: "https://instagram-fullstack-clone-alpha.vercel.app",
   credentials: true,
 };
 app.use(cors(corsOptions));
-
+app.get("/", (req, res) => {
+  res.json("Server is up and running");
+});
 // routes
 app.use("/api/v1/user", authRouter);
 app.use("/api/v1/post", postRouter);
 app.use("/api/v1/message", messageRouter);
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   connectDB();
   console.log(`server is running on port ${PORT}`);
 });

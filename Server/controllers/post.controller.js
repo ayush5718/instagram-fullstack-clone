@@ -3,6 +3,7 @@ import { Post } from "../models/post.model.js";
 import { User } from "../models/user.model.js";
 import { Comment } from "../models/comment.model.js";
 import cloudinary from "../config/cloudinary.js";
+import { getRecieverSocketId, io } from "../socket/socket.js";
 
 export const addNewPost = async (req, res) => {
   try {
@@ -126,6 +127,22 @@ export const likePost = async (req, res) => {
     await post.save();
 
     // implement socet io for real time notification
+    const user = await User.findById(likeKarneWalaKiId).select(
+      "username profilePicture"
+    );
+    const postAuthor = post.author.toString();
+    if (user !== postAuthor) {
+      // emit a notification event
+      const notification = {
+        type: "like",
+        userId: likeKarneWalaKiId,
+        userDetails: user,
+        postId: postId,
+        message: "Your post has been liked",
+      };
+      const postAuthorSocketId = getRecieverSocketId(postAuthor);
+      io.to(postAuthorSocketId).emit("notification", notification);
+    }
 
     return res.status(200).json({
       message: "Post liked",
@@ -148,6 +165,25 @@ export const dislikePost = async (req, res) => {
     }
     await post.updateOne({ $pull: { likes: dislikeKarneWalaKiId } });
     await post.save();
+
+    // implement socet io for real time notification
+    const user = await User.findById(dislikeKarneWalaKiId).select(
+      "username profilePicture"
+    );
+    const postAuthor = post.author.toString();
+    if (user !== postAuthor) {
+      // emit a notification event
+      const notification = {
+        type: "dislike",
+        userId: dislikeKarneWalaKiId,
+        userDetails: user,
+        postId: postId,
+        message: "Your post has been liked",
+      };
+      const postAuthorSocketId = getRecieverSocketId(postAuthor);
+      io.to(postAuthorSocketId).emit("notification", notification);
+    }
+
     return res.status(200).json({
       message: "Post disliked",
       success: true,
@@ -276,11 +312,11 @@ export const bookmarkPost = async (req, res) => {
       });
     }
 
-    const user = await findById(authorId);
+    const user = await User.findById(authorId);
     // check if user already bookmarked the post (agar wo ek bar bookmark kr diya hai toh dubara unbookmark karega na laude)
-    if (user.bookmarks.includes(postId._id)) {
+    if (user.bookmarks.includes(post._id)) {
       // already bookmarked-> unbookmark(remove from the bookmark)
-      await user.updateOne({ $pull: { bookmarks: postId._id } });
+      await user.updateOne({ $pull: { bookmarks: post._id } });
       await user.save();
       return res.status(200).json({
         type: "unsaved",
@@ -289,7 +325,7 @@ export const bookmarkPost = async (req, res) => {
       });
     } else {
       // not bookmarked-> bookmark (add to the bookmark)
-      await user.updateOne({ $addToSet: { bookmarks: postId._id } });
+      await user.updateOne({ $addToSet: { bookmarks: post._id } });
       await user.save();
       return res.status(200).json({
         type: "saved",
