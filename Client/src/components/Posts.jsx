@@ -8,8 +8,8 @@ const Posts = () => {
   console.log(posts);
 
   return (
-    <div className=" mx-auto w-1/2 ml-24">
-      {posts && posts?.map((item, index) => <Post key={index} post={item} />)}
+    <div className="space-y-2">
+      {posts && posts.map((item, index) => <Post key={index} post={item} />)}
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { setMessages, setSelectedUser } from "@/redux/chatSlice";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { MessageCircleCode } from "lucide-react";
+import { ArrowLeft, MessageCircleCode, Send } from "lucide-react";
 import Messages from "./Messages";
 import axios from "@/api/axios";
 
@@ -17,6 +17,13 @@ const Chatpage = () => {
   );
 
   const [message, setMessage] = useState("");
+  const [showUserList, setShowUserList] = useState(true);
+
+  useEffect(() => {
+    if (selectedUser && window.innerWidth < 768) {
+      setShowUserList(false);
+    }
+  }, [selectedUser]);
 
   const sendMessageHandler = async (receiverId) => {
     try {
@@ -39,32 +46,43 @@ const Chatpage = () => {
       console.log(error);
     }
   };
+
+  const handleBackToList = () => {
+    setShowUserList(true);
+    dispatch(setSelectedUser(null));
+  };
+
   useEffect(() => {
     return () => {
       dispatch(setSelectedUser(null));
     };
   }, []);
-  return (
-    <div className="flex ml-[16%] h-screen">
-      <section className="w-full md:w-1/4 my-8">
-        <h1
-          onClick={() => dispatch(setSelectedUser(null))}
-          className="font-bold mb-4 px-3 text-xl"
-        >
-          {user?.username}
-        </h1>
-        <hr className="mb-4 border-gray-300" />
 
-        <div className="overflow-y-auto h-[80vh] ">
+  return (
+    <div className="flex flex-col md:flex-row h-screen md:ml-[16%]">
+      {/* Users List Section */}
+      <section
+        className={`${
+          !showUserList ? "hidden" : "block"
+        } md:block w-full md:w-1/4 border-r border-gray-300`}
+      >
+        <div className="p-4 border-b border-gray-300">
+          <h1 className="font-bold text-xl">{user?.username}</h1>
+        </div>
+
+        <div className="overflow-y-auto h-[calc(100vh-60px)]">
           {SuggestedUsers?.map((suggestedUser) => {
             const isOnline = onlineUsers?.includes(suggestedUser._id);
             return (
               <div
-                onClick={() => dispatch(setSelectedUser(suggestedUser))}
+                onClick={() => {
+                  dispatch(setSelectedUser(suggestedUser));
+                  setShowUserList(false);
+                }}
                 key={suggestedUser._id}
-                className="flex gap-3 items-center p-3 hover:bg-gray-50 cursor-pointer"
+                className="flex gap-3 items-center p-4 hover:bg-gray-50 cursor-pointer"
               >
-                <Avatar className="w-14 h-14">
+                <Avatar className="w-12 h-12">
                   <AvatarImage
                     src={suggestedUser?.profilePicture}
                     alt="profilePicture"
@@ -87,44 +105,61 @@ const Chatpage = () => {
           })}
         </div>
       </section>
-      {selectedUser ? (
-        <section className="flex-1 border-l-gray-300 flex flex-col h-full">
-          <div className="flex gap-3 items-center px-3 py-2 border-b border-gray-300 sticky top-0 bg-white z-10">
-            <Avatar>
-              <AvatarImage src={selectedUser?.profilePicture} alt="Profile" />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span>{selectedUser?.username}</span>
+
+      {/* Chat Section */}
+      <section
+        className={`${
+          showUserList ? "hidden" : "block"
+        } md:block flex-1 h-full flex flex-col`}
+      >
+        {selectedUser ? (
+          <>
+            <div className="flex gap-3 items-center px-4 py-3 border-b border-gray-300 bg-white">
+              <button onClick={handleBackToList} className="md:hidden">
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+              <Avatar className="w-10 h-10">
+                <AvatarImage src={selectedUser?.profilePicture} alt="Profile" />
+                <AvatarFallback>CN</AvatarFallback>
+              </Avatar>
+              <span className="font-medium">{selectedUser?.username}</span>
             </div>
-          </div>
-          <Messages selectedUser={selectedUser} />
-          <div className="flex items-center p-4 border-t-gray-300">
-            <Input
-              type="text"
-              className="flex-1 mr-2 focus-visible:ring-transparent"
-              placeholder="Type message..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  setMessage("");
+
+            <Messages selectedUser={selectedUser} />
+
+            <div className="flex items-center p-4 border-t border-gray-300 bg-white md:mb-0 mb-20">
+              <Input
+                type="text"
+                className="flex-1 mr-2 focus-visible:ring-transparent"
+                placeholder="Type message..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && message.trim()) {
+                    sendMessageHandler(selectedUser?._id);
+                  }
+                }}
+              />
+              <Button
+                onClick={() =>
+                  message.trim() && sendMessageHandler(selectedUser?._id)
                 }
-              }}
-            />
-            <Button onClick={() => sendMessageHandler(selectedUser?._id)}>
-              Send
-            </Button>
+                size="icon"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+            <MessageCircleCode className="w-24 h-24 md:w-32 md:h-32 my-4 text-gray-400" />
+            <h1 className="font-medium text-xl mb-2">Your messages</h1>
+            <span className="text-gray-500">
+              Send a message to start a chat
+            </span>
           </div>
-        </section>
-      ) : (
-        <div className="flex flex-col items-center justify-center mx-auto">
-          <MessageCircleCode className="w-32 h-32 my-4" />
-          <h1 className="font-medium text-xl">Your messages</h1>
-          <span>Send a message to start a chat</span>
-        </div>
-      )}
+        )}
+      </section>
     </div>
   );
 };

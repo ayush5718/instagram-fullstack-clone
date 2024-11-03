@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { Bookmark, MessageCircle, MoreHorizontal, Send } from "lucide-react";
 import { Button } from "./ui/button";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
-import { Input } from "./ui/input";
 import CommentDialog from "./CommentDialog";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "@/api/axios";
@@ -22,6 +21,7 @@ const Post = ({ post }) => {
   const [liked, setLiked] = useState(post?.likes?.includes(user?._id) || false);
   const [postLikeCount, setPostLikeCount] = useState(post?.likes?.length);
   const [comment, setComment] = useState(post?.comments);
+
   const changeEventHandler = (event) => {
     setText(event.target.value);
     const inputText = event.target.value;
@@ -52,13 +52,9 @@ const Post = ({ post }) => {
     try {
       const action = liked ? "dislike" : "like";
 
-      const res = await axios.get(
-        `/post/${post._id}/${action}`,
-
-        {
-          withCredentials: true,
-        }
-      );
+      const res = await axios.get(`/post/${post._id}/${action}`, {
+        withCredentials: true,
+      });
       if (res?.data?.success) {
         const updatedLikes = liked ? postLikeCount - 1 : postLikeCount + 1;
         setPostLikeCount(updatedLikes);
@@ -82,7 +78,6 @@ const Post = ({ post }) => {
     }
   };
 
-  // bookmark handler
   const bookmarkHandler = async () => {
     try {
       const res = await axios.get(`/post/${post._id}/bookmark`, {
@@ -120,8 +115,9 @@ const Post = ({ post }) => {
       toast.error(error?.response?.data?.message);
     }
   };
+
   return (
-    <div className="my-8 w- max-w-sm mx-auto ">
+    <div className="my-8 w-full max-w-md mx-auto p-4 md:p-6 border rounded-md shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Avatar>
@@ -132,7 +128,7 @@ const Post = ({ post }) => {
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
           <div className="flex items-center gap-2">
-            <h1>{post?.author?.username}</h1>
+            <h1 className="text-sm md:text-base">{post?.author?.username}</h1>
             {user?._id === post?.author?._id && (
               <Badge variant="secondary">Author</Badge>
             )}
@@ -152,19 +148,17 @@ const Post = ({ post }) => {
             >
               Unfollow
             </Button>
-
             <Button
               variant="ghost"
-              className="cursor-pointer w-fit "
+              className="cursor-pointer w-fit"
               onClick={bookmarkHandler}
             >
               Add to favourite
             </Button>
-
             {user?._id === post?.author?._id && (
               <Button
                 variant="ghost"
-                className="cursor-pointer w-fit "
+                className="cursor-pointer w-fit"
                 onClick={deletePostHandler}
               >
                 Delete
@@ -174,7 +168,7 @@ const Post = ({ post }) => {
         </Dialog>
       </div>
       <img
-        className="rounded-sm my-2 w-full aspect-square object-cover"
+        className="rounded-sm my-2 w-full object-cover aspect-square"
         src={post?.image}
         alt="post_img"
       />
@@ -184,17 +178,16 @@ const Post = ({ post }) => {
           {liked ? (
             <FaHeart
               size={"24px"}
-              className="cursor-pointer hover:text-red-600 text-red-600 "
-              onClick={() => likeOrDislikeHandler()}
+              className="cursor-pointer hover:text-red-600 text-red-600"
+              onClick={likeOrDislikeHandler}
             />
           ) : (
             <FaRegHeart
               size={"24px"}
               className="cursor-pointer hover:text-red-600"
-              onClick={() => likeOrDislikeHandler()}
+              onClick={likeOrDislikeHandler}
             />
           )}
-
           <MessageCircle
             onClick={() => {
               dispatch(setSelectedPost(post));
@@ -204,16 +197,14 @@ const Post = ({ post }) => {
           />
           <Send className="cursor-pointer hover:text-gray-600" />
         </div>
-        <div>
-          <Bookmark
-            onClick={bookmarkHandler}
-            className="cursor-pointer hover:text-gray-600"
-          />
-        </div>
+        <Bookmark
+          onClick={bookmarkHandler}
+          className="cursor-pointer hover:text-gray-600"
+        />
       </div>
       <span className="font-medium block mb-2">{postLikeCount} likes</span>
-      <p>
-        <span className="font-medium mr-2">AayushK</span>
+      <p className="text-sm md:text-base">
+        <span className="font-medium mr-2">{post?.author?.username}</span>
         {post?.caption}
       </p>
 
@@ -222,24 +213,24 @@ const Post = ({ post }) => {
           dispatch(setSelectedPost(post));
           setOpen(true);
         }}
-        className="text-gray-500 block cursor-pointer text-sm "
+        className="text-gray-500 block cursor-pointer text-xs md:text-sm"
       >
-        {post?.comments.length == 0
+        {post?.comments.length === 0
           ? "No comments"
-          : `View all${post?.comments.length} comments`}
+          : `View all ${post?.comments.length} comments`}
       </span>
       <CommentDialog open={open} setOpen={setOpen} />
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mt-2">
         <input
           type="text"
-          className="w-full outline-none text-sm"
+          className="w-full outline-none text-sm p-2"
           placeholder="Add a comment..."
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
         {text && (
           <span
-            className="text-[#3BADF8] cursor-pointer"
+            className="text-blue-500 cursor-pointer ml-2"
             onClick={commentHandler}
           >
             Post

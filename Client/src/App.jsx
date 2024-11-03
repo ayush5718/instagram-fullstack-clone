@@ -13,26 +13,47 @@ import { useDispatch, useSelector } from "react-redux";
 import { setSocket } from "./redux/socketSlice";
 import { setOnlineUsers } from "./redux/chatSlice";
 import { setLikeNotification } from "./redux/notificationSlice";
+import ProtectedRoutes from "./components/ProtectedRoutes";
 const browserRouter = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />,
+    element: (
+      <ProtectedRoutes>
+        <MainLayout />
+      </ProtectedRoutes>
+    ),
     children: [
       {
         path: "/",
-        element: <Home />,
+        element: (
+          <ProtectedRoutes>
+            <Home />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "/profile/:id",
-        element: <Profile />,
+        element: (
+          <ProtectedRoutes>
+            <Profile />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "/account/edit",
-        element: <EditProfile />,
+        element: (
+          <ProtectedRoutes>
+            <EditProfile />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "/chat",
-        element: <Chatpage />,
+        element: (
+          <ProtectedRoutes>
+            <Chatpage />
+          </ProtectedRoutes>
+        ),
       },
     ],
   },
@@ -51,15 +72,12 @@ const App = () => {
   const { socket } = useSelector((store) => store.socketio);
   useEffect(() => {
     if (user) {
-      const socketio = io(
-        "https://instagram-fullstack-clone-backend.vercel.app",
-        {
-          query: {
-            userId: user._id,
-          },
-          transports: ["websocket"],
-        }
-      );
+      const socketio = io(import.meta.env.VITE_BACKEND_URL, {
+        query: {
+          userId: user._id,
+        },
+        transports: ["websocket"],
+      });
       dispatch(setSocket(socketio));
 
       // listening all the socket events

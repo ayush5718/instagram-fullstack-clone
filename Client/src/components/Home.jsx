@@ -8,13 +8,14 @@ import useGetSuggestedUsers from "@/hooks/useGetSuggestedUsers";
 const Home = () => {
   useGetAllPost();
   useGetSuggestedUsers();
+
   return (
-    <div className="flex">
-      <div className="flex-grow">
-        <Feed />
-        <Outlet />
+    <div className="container mx-auto flex flex-col md:flex-row px-4">
+      <Feed />
+      <Outlet />
+      <div className="hidden md:block">
+        <RightSidebar />
       </div>
-      <RightSidebar />
     </div>
   );
 };
