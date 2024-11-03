@@ -22,9 +22,18 @@ app.use(express.urlencoded({ extended: true }));
 const corsOptions = {
   origin: process.env.FRONTEND_URL,
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 app.use(cors(corsOptions));
+
+// Add security headers
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
+  next();
+});
 
 app.get("/", (req, res) => {
   res.json("Server is up and running");

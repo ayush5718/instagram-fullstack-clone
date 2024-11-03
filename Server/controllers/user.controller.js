@@ -15,6 +15,7 @@ export const register = async (req, res) => {
         success: false,
       });
     }
+
     const usernameCheck = await User.findOne({ username });
     if (usernameCheck) {
       return res.status(401).json({
@@ -81,6 +82,14 @@ export const login = async (req, res) => {
     const token = await jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
+
+    // Updated cookie settings
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Must be true in production
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Must be 'none' in production
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    };
     // populate each post if in the posts array
     const populatedPosts = await Promise.all(
       user.posts.map(async (postId) => {
@@ -102,18 +111,19 @@ export const login = async (req, res) => {
       following: user.following,
       posts: populatedPosts,
     };
-    return res
-      .cookie("token", token, {
-        httpOnly: true,
-        sameSite: "strict",
-        maxAge: 1 * 24 * 60 * 60 * 1000,
-      })
-      .json({
-        message: `Welcome Back ${user.username}`,
-        success: true,
-        user,
-      });
-  } catch (error) {}
+
+    return res.cookie("token", token, cookieOptions).json({
+      message: `Welcome Back ${user.username}`,
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
 };
 
 // controller to logout
